@@ -1,14 +1,14 @@
+const bcrypt = require("bcrypt");
 const Admin = require("../model/registerModel");
 
 const register = async (req, res) => {
   try {
-    
     const { username, password } = req.body;
 
-    const userExists = Admin.findOne({ username });
+    const userExists = await Admin.findOne({ username });
 
-    if (!userExists) {
-      return res.status(401).json({
+    if (userExists) {
+      return res.status(400).json({
         messaage: `User already exists`,
         success: false,
       });
@@ -18,7 +18,6 @@ const register = async (req, res) => {
     const savedUser = await user.save();
 
     return res.status(200).json(savedUser);
-
   } catch (error) {
     res.status(500).json({
       message: `Internal Server Error: ${error.message}`,
@@ -36,6 +35,17 @@ const login = async (req, res) => {
         message: `Fill out all the feilds`,
         success: false,
       });
+    }
+
+    const existingUser = Admin.findOne({ user });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        message: `User dont exists `,
+        success: false,
+      });
+
+      const hashedPassword = Admin.bcrypt.hash(password, 10);
     }
   } catch (error) {}
 };
